@@ -1,0 +1,121 @@
+
+
+Q
+What is socket.io?
+A
+=>Socket.IO enables real-time bidirectional event-based communication.
+=>Push data to clients that gets represented as real-time counters, charts or logs.
+
+=>socket.io is perfect for chatting app and online cooberation app
+
+
+Q
+How to set up socket.io in the react app?
+A
+[Basic idea]
+To set up socket.io, we need to set them up both on the client side and the server side.
+
+//Set up on the server side:
+var express = require('express');
+
+var app = express();
+
+var connections = [];
+var users = [];
+
+app.use(express.static ('./public'));
+
+var server = app.listen(3000);
+io = require('socket.io').listen(server);
+
+io.sockets.on('connection', function(socket){
+	connections.push(socket);
+	console.log('Connected: %s sockets connected', connections.length);
+});
+
+console.log('Server is running on port 3000');
+
+//set up on the client:
+componentWillMount(){
+		this.socket=io('http://localhost:3000');
+		this.socket.on('connect',this.connect.bind(this));
+
+	}
+
+	connect(){
+		this.setState({status: 'connected'});
+		console.log('Conneced: '+this.socket.id);
+	}
+
+
+Q
+How can we abstract user input and put them into socket.io?
+A
+step1: abstract the user input:
+	set up the callback onSubmit
+	refer to the user input by
+	this.refs.text.value
+
+step2: there is a event listening machanism in the socket.io:
+
+we can emit the event with the name and payload,
+in the server side, socket can listen to that event name and do something about it:
+
+//client-side emit:
+emit(eventName, payload){
+		this.socket.emit(eventName, payload);
+	}
+this.props.emit('messageAdded', {
+			timeStamp: Date.now(),
+
+			//this.refs point to the DOM element
+			//which give us access to the DOM
+			text: this.refs.text.value.trim()
+		});
+
+//server-side listen:
+socket.on('messageAdded', function(payload){
+		console.log(payload);
+	});
+
+
+
+Q
+Once server get the data, we we gonna do with it?
+A
+(1) first, we push it back to the client side 
+socket.on('messageAdded', function(payload){
+		var newMessage = {
+			timeStamp: payload.timestamp,
+			text: payload.text
+
+		}
+
+		io.emit('messageAdded', newMessage);
+	});
+
+
+(2) client-side listneded that, and add the data to the global state.
+this.socket.on('messageAdded',this.onMessageAdded.bind(this));
+onMessageAdded(message){
+		this.setState({messages: this.state.messages.concat(message)});
+	} 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

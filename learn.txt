@@ -1,0 +1,700 @@
+********************************************
+
+
+Some notice:
+"=>" means the step follwed in the tutorial
+
+***   *** stands for a new concept
+!!! means something needs to pay attention to
+@@@@@  general idea
+
+
+
+*********************************************
+
+
+
+
+
+
+
+
+
+#################
+    Section 1
+#################
+
+
+Q what is JSX?
+A It is some html code within the javascript code
+->JSX needs to be compiled to javascript before it can be run by the browser,
+->before the browser starts to interpret the script. JSX will convert all the script code between <script > to pure javascript
+
+=>To set up a file that have react and JSX, we will need to include:
+	<script src="https://fb.me/react-0.14.6.js"></script>
+	<script src="https://fb.me/react-dom-0.14.6.js"></script>
+	<script src="https://fb.me/JSXTransformer-0.12.2.js"></script>
+
+=>The basic structure of the JSX script is consist of three parts:
+	//define a react component class
+
+	//instantatitate that class (create an element with createElement function.)
+
+	//When we tell react to render this class, we need to 
+	//tell it where to put the rendered dom
+
+	->what is a component class?
+	It is defining a view.
+	It is the definition of a component.
+	It must be first instanciated, then be redered as html.
+
+Q What is the react-dom script doing?
+A This script is used to render the class into dom. 
+  react script is used to define the component. 
+
+Q How to define a component class?
+A var HelloWorld = React.createClass({});
+	//note we need to pass in an object inorder to define the class.
+	//in orther words, we define the class within the {}
+
+	in the object, there should be a render function which will return a JSX (that will be the component that 
+	be rendered to the page.)
+
+
+Q How to instantiate (render) a class?
+A var element = React.createElement(Helloworld);
+
+Q how to render the react component into DOM?
+A ReactDOM.render(class_instance, the place to put the dom)
+	Ex:
+	ReactDOM.render(element, document.body);
+
+
+#####################
+      Section 2
+Intermediate Concept
+#####################
+
+When we instantiate a class, we can add some property to it
+To make it a little bit different from its class. 
+
+=>put the link of the bootstrap into the index file, so later we can use the bootstrap.
+=>the goal of this part is to create a message badge, where can dynamically display the box information
+	like(message, spam. etc) and the number of the messages we got. 
+=>copy the corresponding badge code in the bootstrap component badge 
+=>when we put the class name in the html tag, why the corresbonding css doesnt apply?
+the prolem is class is also a key word in javascript, so it is confusing.
+in order to make it clear, we need to change the class to classname in the html tag.
+
+Q How to convert the static component to a dynamic component?
+A there are 3 steps to do it:
+	Step1: replace the static text with {this.props.var}
+	Step2: define these variables before instatiate in an object form as options:
+			Ex: var options = {
+			title = "sdsd",
+			name = "sdad"
+			}
+	Step3: pass this option object to the createElement as the second argument. 
+			Ex: var element = React.createElement(message, options);
+
+***nesting component***
+***********************
+
+We can put one component inside another component.
+
+Q Where should we put the nested component and How can we do it?
+A 
+	We should put the nested component in the place where we define the parent component class.
+	The in the render function of the createClass function. 
+	Ex:
+	var form = React.createClass({
+		render: function()
+		{
+			return <div>
+			<Badge />
+			</div>
+		}
+	})
+
+	how do we do it?
+	just like a calling a function inside another function, we need to decalre and define the nested class first
+	then call it in its parent class 
+
+Q where should we put the options(attributes) of the nested components?
+A 
+	we should just treated and use nested component as a normal element
+	inside the tag:
+	<Badge title={} number = {} />
+
+	we can also make the attribute dynamic by using this.props
+	<Badge title={this.props.title} number = {this.props.number} />
+
+	then we can pass in these attibute by options to its parent. 
+
+	Ex:
+	var Badge = React.createClass ({
+		render: function()
+		{
+			return <button>
+			{this.props.title} - {this.props.number}
+			</button>
+		}
+	});
+
+	var form = React.createClass ({
+		render: function()
+		{
+			return <div>
+			<Badge title={this.props.title} number={this.props.number} />
+			</div>
+		}
+	});
+
+Q Do we need to instantiate the nested component?
+A We dont have to.
+	Instantiate its parent component will be suffice. 
+
+=>in this part we are gonna to create a thumbnail where there is a button nested inside of the thumbnail
+=>it is a good habit to move the <script> part out of the <body>
+=>use document.querySelector() to put the rendered view to specified ‘class’ name. 
+!!!! for JSX has a strict policy regarding the closing tag,
+	<img src=" "> will cause error in JSX, we need to close it. 
+!!!! to give attribute to a nested component, every attribute shoould be inside of the quotation mark, even it is just a number,
+
+
+***rendering a list of component2***
+************************************
+
+=>the idea is the same, we are using the nested concept
+=>we create a thumnaillist component, and its child component will be thumbnails
+
+Q Since we have a list of the componet (parent component contains list of nested component), How can we deal with the options?
+A 
+	By brutal force, we can hard coded the options, and makes it a long list.
+	but, since we are repeating the nested components, their structure are all the same.
+	So we can make a list of the nested comonent's option.
+
+	How?
+	options is still an object, inside that object, it has a member variable thumbnail_data, which is a type of list.
+	inside of that list, we have objects for options of each thumbnail. 
+
+	Ex: 
+	var options = {
+		thubnailList:[{}, {}, {}]
+	}
+
+Q how can we make a list of nested component in parent component?
+A 
+	the goal is: we need to produce a list of the component based upon their own options.
+	the idea is: we can take in an array of those options, and according to that use map() function
+	to produce the component, and return it as new list. 
+	we need to use the map function built in JavaScript.
+	the detail explainantion of map() function is in the next questio. 
+	Ex:
+
+
+Q what is the map() funtion in JS?
+A map() is a member function of array prototype.
+	it takes in one argument, a call back function.
+	it execute callback() function on each of its element, and return a new list of its element.
+	Ex:
+	var numbers = [1, 4, 9];
+	var roots = numbers.map(Math.sqrt);
+	// roots is now [1, 2, 3], numbers is still [1, 4, 9]
+
+Q what is the callback () function in Map()?
+A callback function will be called upon each element in the original list
+	it has three arguments:
+	1. the current element been processed.
+	2. the index of the current value been processed.
+	3. array, the array map was called uponb. 
+
+	normally, we can omit the last two arguments 
+	
+Q Is there a way we can pass in the options to the component as an object instead of specified them one by one?
+A 
+	normally we will have to do
+	<Badge title = {this.props.title} number = {this.props.number} />
+
+	Now we can pass in a entire object contining title and number fields by:
+	<Badge {...objct} />
+
+var options = {
+		thumbnailData : [
+		{
+			title : "Learn it",
+			number : 108,
+			imageURL : 'https://s3.amazonaws.com/media-p.slid.es/uploads/alexanderfarennikov/images/1198519/reactjs.png',
+			header: 'lear React.js',
+			description: 'React is a JavaScript library for creating user interfaces by Facebook and Instagram. Many people choose to think of React as the V in MVC. We built React to solve one problem: building large applications with data that changes over time.'
+		},
+		{
+			title : "Learn it",
+			number : 38,
+			imageURL : 'https://avatars0.githubusercontent.com/u/6200624?v=3&s=400',
+			header: 'lear Gulp.js',
+			description: 'Gulp is a fast and intuitive streaming build tool built on Node.js. Check out their website and docs to get started. If you re familiar with Grunt, it s similar, but has some advantages. Here s some of the sweet stuff you try out with this repo.'
+
+
+		}]
+	};
+
+
+Ex：module.exports = React.createClass({
+		render: function(){
+			var list = this.props.thumbnailData.map(function(thumbnailProps){
+				return <Thumbnail {...thumbnailProps} />
+			}) 
+
+			return <div>
+				{list}
+			</div>
+		}
+	});
+
+
+#####################
+      Section 3
+Tooling for React.js
+#####################
+
+The idea is to seperate the JSX script into multiple files that
+each component class has its own file
+and we will have a file app.jsx to bootstrap all the other file and give options and render the view. 
+(1) we need to break the JSX file to multiple files each component class a file
+(2) compile each JSX file to javascript
+(3) combine all the file to a single javasctipt file
+(4) include it to the main html file. 
+
+So we need some toolings to help us to do that. 
+
+=>we break the JSX to multiple files.
+
+Q what should be put in the app.jsx?
+A 
+=>we need to use the app.jsx file to bootstrap all the other file. 
+=>We should put all the options object and the render method into the app.jsx file
+
+Q How can we convert these jsx files into javascript files?
+A We can use gulp.js to compile it to javascript.
+	gulp.js is build with node.js and need (npm (node package manager) to install it)
+	gulp-react is used to compile the file
+	gulp-concate is used to join all the files together. 
+
+=>use npm to install gulp.js
+=>pretty much the same as the makefile, for gulp.js we need to write a gulpfile.js to tell how to compile and concat the whole project.
+
+Q What is gulpfile.js and how to write it?
+A 
+=>gulpfile.js is pretty much the same as makefile in unix.
+it tell gulp how to compile the jsx and how to concat them. 
+//first, we need to include three files:
+//gulp, gulp-react and gulp-concat
+
+var gulp = require ('gulp');
+var react = require ('gulp-react');
+var concat = require ('gulp-concat');
+
+
+
+//will run this immediately
+gulp.task('default', function(){
+	//we need to go to the src directory
+	//compile all the jsx files
+	//concat these files together
+	//produce one single file
+	return gulp.src('src/**')   //load all the files form src directory
+		.pipe(react()) //compile them to react
+		.pipe(concat('application.js')) //concat them together to a file called application.js
+		.pipe(gulp.dest('./')); //put the application.js to the working directory.
+});
+
+
+!!!! there is a problem, if we build the gulpfile.js this way, the order will be wierd (it is alphabetic order)
+!!!! child component should go before parent component.
+!!!! app.js should go at the end. 
+!!!! option and render will appear infront of the component class, where the rederingprocess will have problem
+
+
+Q How to solve the probelm above?
+A The idea is we need to make sure the app.js is loaded in the end. 
+  How can we make sure the files are loaded in the right order?
+  We gonna use browserify.
+  put each component into a single module(in seperate file)
+  if we want to use one module in another module, we use require to ask browserify to include that file.
+  Since we follow the convention that the class name and file name be the same (class name will capitalize the first letter)
+
+  var class_name = require('file_name');  //put this line on top of the file
+  will tell the browserfy to load that module first.
+
+  this function also facilitate the reusage of many code and component.
+  we can use other component simply by requiring it and feed it with the options.
+
+ =>now we need to update the gulpfile to use the browsefy and modify each component file to add therequirement. 
+ =>npm install --save browserify reactify vinyl-source-stream watchify gulp-util
+ this commend will install the needed files to do the browserify
+
+ =>now, we need to rewrite the gulpfile.js:
+ =>inorder to let gulp do the job, we need to install react in npm(node pacage manage)
+ since we wont incude react in every single componetn file. 
+ =>when the require function calls on a component, we need to somehow return the component back
+ 	todo this we will use the module.exports
+ 	Ex: module.exports = React.creatClass({
+ 	
+ 	})
+
+Ex：
+var gulp = require ('gulp');
+var gutil = require ('gulp-util'); //print debuging
+var source = require ('vinyl-source-stream');//
+var browserify = require('browserify');//figure what part of code depends on another
+var watchify = require('watchify');//tool rerun gulp again if the souce changes.
+var reactify = require('reactify'); //converting jsx to js
+
+
+gulp.task('default', function(){
+	var bundler = watchify(browserify({
+		entries:['./src/app.jsx'], //the starting file, usually the bootstrap file
+		transform: [reactify],//compile to js file
+		extensions: ['.jsx'],//go visit all the file ended with .jsx
+		debug: true, 
+		cache: {},
+		packageCache: {},
+		fullPaths: true
+	}));
+
+	function build(file)  //create a build funtion to excute
+	{
+		if(file) 
+			gutil.log('Recompiling '+file);
+
+		return bundler
+			.bundle()
+			.on('error', gutil.log.bind(gutil, 'Browserify Error'))
+			.pipe(source('main.js')) //the output file
+			.pipe(gulp.dest('./')); //store it in the working directory
+	};
+
+	build();
+	bundler.on('update', build);
+});
+
+
+#########################
+Section 4:State and Event
+#########################
+
+=>in this section, we gonna build a drop down button
+=>when user click on it, it will show up a drop down list.
+
+=>to do this, we create a dropdown component, inside of it,, has a list component and a button component.
+
+var React = require('react');
+var Button = require('./button');
+var List = require('./list');
+
+module.exports = React.createClass({
+	render: function(){
+		return <div className="dropdown">
+			<Button className="btn-default" title = {this.props.title} subTitleClassName="caret" />
+		</div>
+	}
+});
+
+note here, we can also pass in className as an props.
+
+=>now, we need to define component of button abd list 
+Ex button:
+module.exports = React.createClass({
+		render: function(){
+			return <button className={"btn "+this.props.className} type="button">
+					  {this.props.title} 
+					  <span className={this.props.subTitleClassName}>{this.props.subTitle}</span>
+					</button>
+		}
+	});
+
+
+Q How can we add event to a component? say if a user clicks on the button, the button will do something.
+A 
+	the idea is bacially the same as jquery handle the event.
+	->there are a lot of defined attribute in the library, eg: onClick
+	->we can assign function to these event attribute, so when the event was trigured, the function will be called.
+	->where to define the function? in the same component class.
+	Ex:
+	<button onClick=function(){} />
+
+=><Button> is nested inside of the <Dropdown> we want to define the event state in the <Button> not the actual 
+	tag <button> in the <Button>, however, we cant use event handler in the component, because it is not a html element
+
+Q How to solve the problem above?
+A The idea is we still define the event handler in the parent component, we give a refenrence to that function in
+	its nested component as a reference (as property), and we use the event state in the real html element
+	Ex:
+	in the Dropdown component:
+	module.exports = React.createClass({
+		handleClick = function()
+		{
+			alert('balh')
+		}
+
+		render: function()
+		{
+			return <div>
+				<Button whenClicked = {this.handleClick} />
+			</div>
+		}
+	});
+
+	in the Button component:
+	module.exports = React.createClass({
+		render: function()
+		{
+			return <button onclick = {this.props.whenClicked} />
+		}
+	});
+
+Q Where to find all the event supported by react.js?
+A https://facebook.github.io/react/docs/events.html 
+
+
+=>the rule of the thumb of building up component is we should make each part that is subject to change as a component. 
+
+=>this time, we child to make a list componet that can display the dropdown list.
+=>there are many ways we can implement that list component. follow the rule above, the structure is like:
+	in the dropdown conmponent, we have
+	<ul> {list} </ul> where {list} is an array of <li> sth sth </li>
+	the way to do this is to use a map function, we take in an array of items['apple pie', 'banaa', 'coffee']
+	then use a callback function to convert them to <ListItem item={item} />
+	then we have a <listItem> component defined, which simply return the <li>{this.props.item}</li>
+
+
+
+***State***
+***********
+
+state is like weather to show or not show, open or not open, things like that.
+say, if we click on a button, we want it to show the dropdown list.
+dropdown list has a attribute "show"
+so we kind of want to control if there is a show append to the class or not
+how?
+(1): set up an initial statement getInitialStatement: function(){return ({open: false})}
+(2): we need a method that will change the state and force the browser to rerender it after we trigured some event
+	we put that in the event handler:
+	handleClick: function()
+		{
+			this.setState({open:!this.state.open})
+		},
+
+	
+(3):we need to use the state to change the attribute of the class (whether have the attribute or not)
+    use (?) : 
+    (open?) "show":""
+
+=>in this part, we need to add three more functions to our buttons
+1) when we click on something, the menu should closed
+	for each <li> we need to add a event listener and a handler.
+2) when we click on something, the list should be selected
+3) when we click on something, the list title should be appear on the buttton. 
+
+
+
+
+
+render: function() {
+    var list = this.props.items.map(function(item){
+      return <ListItem
+              item={item}
+              whenItemClicked={this.handleItemClick}
+              className={this.state.itemTitle === item ? "active" : "" } />
+    }.bind(this));
+
+Q Why do we need to use the .bind() for the callback function inside the map?
+
+Q what does bind() stands for?
+A bind() will create a new function with the same budy cntent aas before but set the this to the arguement inside the bind(arg)
+
+Q what problem does it try to solve?
+A sometimes, the programmer try to extract a method from an object, then use this function with the expectation 
+	that the function will use the original object as its this. 
+	Ex; 
+	this.x = 9; 
+	var module = {
+	  x: 81,
+	  getX: function() { return this.x; }
+	};
+
+	module.getX(); // 81
+
+	var retrieveX = module.getX;
+	retrieveX(); // 9, because in this case, "this" refers to the global object
+
+	// Create a new function with 'this' bound to module
+	//New programmers (like myself) might confuse the global var getX with module's property getX
+	var boundGetX = retrieveX.bind(module);
+	boundGetX(); // 81
+
+SO, when dealing with callback function, call back fuction dont have specific object, so we should give it one via bind()
+
+
+Q what is the relation between handleItemClick, whenItemClicked and handleClick?
+A handleItemClick is a function defiend in the render of dropdown
+	whenItemClicked is an attribute name in the item-list , it reference to handleItemclick
+	handleClick is a function in the rrender of the item-list, it actually call the handleItemClick
+
+Q why should we declare the function in the dropdown? why not just define it inside of the item-list?
+A (1) we want the component to be portable, which means list is just a list, it is not suppose to have any behavior
+      it is the dropdown,the parent component define the behavior.
+  (2) However, since the component cant be given event,so the solution is to pass the referece of the function as 
+  		argument, call the function in the child component's html tag. 
+
+@@@@@ general rule1: the basic component should't have the special behavior, it should be as general as possible
+		say, it should just has a place holder( anargument to get a referene to a function) and put it to the event listener, the difinition of the callback function should be defeind in its parent's render function, 
+		sincw it is its parent that are using this behavior. 
+
+
+
+
+
+####################################################################################################
+reviews
+####################################################################################################
+
+Q
+what is the structure of the directory?
+A
+=>in the upper dir, we have:
+  ->index.html
+  ->gulpfile.js (used to complie the jsx to the javascript)
+  ->main.js (compiled jsx file in the src dir)
+  ->src dirc (used to store all the views: component)
+  	->dropdown.jsx
+  	->botton.jsx
+  	->list-item.jsx
+
+Q
+How can the index.html file use the react component？
+A
+(1) we need to include the react.js file
+(2) we need to have a place to render compnent, so we can specify it on the render functinon
+	React.render(element, document.querySelector('.container'));
+(3) we need to put our main.js file in the end:
+Ex:
+<script src="./main.js"> </script>
+
+Q
+How to write the gulpfile.js?
+A
+
+var gulp = require ('gulp');
+var gutil = require ('gulp-util'); //print debuging
+var source = require ('vinyl-source-stream');//
+var browserify = require('browserify');//figure what part of code depends on another
+var watchify = require('watchify');//tool rerun gulp again if the souce changes.
+var reactify = require('reactify'); //converting jsx to js
+
+
+gulp.task('default', function(){
+	var bundler = watchify(browserify({
+		entries:['./src/app.jsx'], //the starting file, usually the bootstrap file
+		transform: [reactify],//compile to js file
+		extensions: ['.jsx'],//go visit all the file ended with .jsx
+		debug: true, 
+		cache: {},
+		packageCache: {},
+		fullPaths: true
+	}));
+
+	function build(file)  //create a build funtion to excute
+	{
+		if(file) 
+			gutil.log('Recompiling '+file);
+
+		return bundler
+			.bundle()
+			.on('error', gutil.log.bind(gutil, 'Browserify Error'))
+			.pipe(source('main.js')) //the output file
+			.pipe(gulp.dest('./')); //store it in the working directory
+	};
+
+	build();
+	bundler.on('update', build);
+});
+
+
+Q
+How to write the app.jsx （What is the structure of the app.jsx file）?
+A
+=>app.jsx is kind of different form other component files.
+	since app.jsx is like the bootstrap file to generaate the whole thing.
+
+(1)we need to require the needed file:
+	var React = require('react');
+	var Dropdown = require('./dropdown');
+	note: ./ means the current directory
+
+(2)We need to define the option object
+	var options = {
+	  title: 'Choose a dessert', // What should show up on the button to open/close the dropdown
+	  items: [ // List of items to show in the dropdown
+	    'Apple Pie',
+	    'Peach Cobbler',
+	    'Coconut Cream Pie'
+	  ]
+	};
+	//we can reference the objects property using this.props
+
+(3)create (instantiate) the class:
+var element = React.createElement(Component, options);
+
+(4) render it to the view.
+React.render(element, document.querySelector('.container'));
+
+
+Q
+How to write the component file (what is the structure of the component file)?
+A
+(1) require the components. 
+	Ex var React = require ('react')
+	var Botton = require ('./button')
+
+(2) module.exports = React.createClass ({
+	
+	//defien eventhandler and setstate function
+	handleClick: function() {
+    this.setState({open: !this.state.open});
+  	},
+
+	//return the html code in the render function 
+	render: function() {
+	return:
+	}
+});
+
+
+Q
+How can the component get access to the options?
+A
+we can use:
+this.props.name
+
+
+Q
+what is the difference bwtween pass option in createElement function and put in the tag <button title = {this.props.title} }?
+A
+=>for the first component, we need to pass in the options using createElement()
+=>for the other component, we just need to use the tag like: <button title = {this.props.title} } />
+
+
+
+
+
+
+
+
+
+
+
+
+
+

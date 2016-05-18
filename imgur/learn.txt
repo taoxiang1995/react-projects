@@ -1,0 +1,324 @@
+
+
+################
+Use Imgur Api
+
+(1) we need to register out applcation in the imgur
+(2) we need to get a user id and API key
+(3) use postman to test out the API
+(4) include user id in the header so the Imgur server can verify our identity,
+
+
+
+#################
+Getting started
+
+(1) download the reactstarter from the stephen grider's website
+(2) npm install to install all the dependencies we will need.
+(3) then use gulp to test it out
+
+
+Q
+what is the react router?
+A
+it is used to facilitate the single page application. 
+in tradional website, we have to use different links and diferent .html files to let the user navigate to diferent pages.
+Now, in the single page application, user will only download index.html page and according to different url, load different contents. 
+=>what is the advantage of that?
+super fast, we do not need to refresh the page.
+
+
+
+intall react router:
+=>npm install --save react-router@1.0.3 history
+
+#######################################
+Change the structure to support routes
+
+Q
+What is the basic structure if we use the routes?
+A
+=>We put all of the components in the src/component folder
+=>routes.jsx 
+   this file handles the routes, specifying which url will display which components.
+   whatever components used in this file should be reuqired first. 
+=>we simply require the routes.jsx file in the app.jsx
+
+
+
+Q
+How to write a typical component?
+A
+ (1) require the react component
+ (2) module.exports = React.createClass({
+ 		render: function(){
+ 			return:
+ 		}
+ });
+
+=>Baisically is the same as  ususal
+
+Q
+How to write the app.jsx file?
+A
+(1) require the routes.jsx file
+(2) dont need the React.createElement method
+(3) render the routes :
+	ReactDOM.render(Routes, document.querySelector('.container'));
+
+
+
+Q
+How to write the routes.jsx file?
+A
+(1) need to require all these:
+	var React = require('react');
+	//do the routing on the page
+	var ReactRouter = require('react-router');
+	//actual router object, decide what content to show
+	var Router = ReactRouter.Router;
+	//config router, instruct how to construct
+	var Route = ReactRouter.Route;
+
+(2) what ever components needed should be required
+	
+(3) odule.exports = (
+	<Router>
+		<Route path="/" component = {Main}>
+			//nested inside of the paht "/"
+			
+		</Route>
+	</Router>
+);
+
+
+
+Q
+Where do we put the css files and where do we include it? since for now we are just defining the componnent, there is no place we can include the css files. 
+A
+=>although we are using the react, but we are still having the index.html file. so we incude the css file in the index.html
+=>remeber we need to include the main.js in the <script> at the bottom of the index.html file, where main.js is the final combinatin of all the jsx file and got translated to the js file. 
+=>since we are using the react starter, so this things have been covered. 
+
+
+Q
+Since we are building the singel page aplication, <a> is not suppporting that since whenever we use the <a> it will reload another page. what should we do about it?
+A
+=><a> is not supporting it, so we need to use somethin else
+=>we can use <Link> which is a part from Router class.
+=>How to use <Link>
+(1)  we need to require the react-router :
+		var Router = require('react-router');
+		var Link = Router.Link;
+(2) then we simply use the <Link> instead of the <a>
+do notice that we need to change the href="" to to=""
+Ex:
+<Link to = "/" className="navbar-brand">
+					Imgur Browser
+				</Link>
+
+
+
+
+
+#######################
+Building the API module
+
+Since we are fetching data from the backend through api calls, we need to have a module to handle these api calls, so we can achieve something like this:
+
+api.get('url').then(function(data){
+	//Do something
+})
+
+
+=>We put the api.jsx (API module in the util directory)
+The api.jsx module looks like this:
+//fetch data using imgur api
+//api module
+var Fetch = require('whatwg-fetch');
+var rootUrl = 'https://api.imgur.com/3/';
+var apiKey = '4098ade8f937743';
+
+
+//fetch will makes an Ajax request to whaeaver url we pass to it
+module.exports = window.api= {
+	get: function (url){
+		return fetch(rootUrl+url, {
+			headers: {
+				'Authorization': 'Client-ID' + apiKey
+			}
+		})//return a promise object
+		//call back function in the then will be called rightafter get function get the result back
+		.then(function(response){
+			return response.json()
+		});
+		
+	}
+};
+
+whatwg-fetch is a module that can make ajax request to url we pass in:
+
+we define a get function which takes in url 
+which will return a promise object by making fetch function call
+
+fetch(url, {header: {} })
+
+=>then function will be called rightafter fetch function fetch back the data. the thing returned will be availabe in the argument of the call back function.
+
+
+Q
+How to use the api module?
+A
+=>require it:
+var Api = require('./api');
+
+=>Api.get(url).then(function(data){
+	//Do something with the data
+	//here the data should be just a json
+})
+
+
+Q
+What is flux?
+A
+=>flux is like the glue that serve as the middleware to fetch the data from the imgur api and plugin to our views. 
+
+
+
+############################
+  Building the topic list
+
+remember in the first page, we have a navigation bar and have topic list on it.
+
+we are building that topic list here.
+
+=>since the topic list should appear at the top of the navigation bar and only appear at the main routes
+=>we put the topic list in a new component called topic-list.jsx
+=>in order to make it do things like: if it is in the main route, nav bar display the topic list, if in other nested route, dont display the topic list, we put this logic to a function:
+
+render: function(){
+		console.log(renderCount++);
+		return <div>
+		<Header />  
+		{this.content()}
+		</div>
+	},
+
+content:  function(){
+		if(this.props.children){
+			return this.props.children;
+		}
+		else
+		{
+			return <TopicList />
+		}
+	}
+
+###############################
+  Install the reflux
+
+=>When I install the reflux, i am having an error that:
+npm ERR! peerinvalid The package history@2.0.1 does not satisfy its siblings' peerDependencies requirements!
+npm ERR! peerinvalid Peer react-router@1.0.3 wants history@^1.17.0
+
+=>this error occur is beacuse package.json dependencies
+=>i fix this error by adding 
+"history": "^1.17.0", to the package.json
+
+Q 
+How to get the data using flux and use it on the view?
+A
+[Basic idea]
+=>to use the Api module to get the data
+=>store the data in the state
+=>use and put the data on the view simply by reference this.state.data
+
+Q
+when do we need to use the bind(this) function?
+A
+=>use it for the call back function that has this.something inside
+Ex:
+componentWillMount: function(){
+		TopicStore.getTopics()
+			.then(function(){
+				this.setState({
+					topics: TopicStore.topics
+				});
+			}.bind(this));
+	//bind(this) is to bind this to the calling function
+	//where to use the bind()? 
+	//=>use it for the call back function which has this. in side of the function body
+
+	},
+
+
+Q
+what is the problem for using the api module and fetch the data in the component file?
+A
+=>we can not communicate the data between the sibling components.
+=>component supose be responsible only for html code and handle user interaction.
+
+Q
+where should we put the code for handling data transmision?
+A
+=>in the src/stores
+=>create a file topic-store.jsx file
+=>inside the file, we include the api module and also require the redux module.
+we write the code prettu much the same as the old version, we 
+export the code and store the data in the this.topics so later we can reference the data in TopicStore.topics
+
+var Api = require('../utils/api');
+var Reflux = require('reflux');
+
+
+module.exports = Reflux.createStore({
+	getTopics:function(){
+		return Api.get('topics/defaults')
+			.then(function(json){
+				this.topics = json.data;
+			}.bind(this));
+	}
+});
+
+// in the topic-list.jsx (component)
+componentWillMount: function(){
+		TopicStore.getTopics()
+			.then(function(){
+				this.setState({
+					topics: TopicStore.topics
+				});
+			}.bind(this));
+	//bind(this) is to bind this to the calling function
+	//where to use the bind()? 
+	//=>use it for the call back function which has this. in side of the function body
+
+	},
+
+=>we still fetch the data in the componentWillMount function, since we obnly need to fetch the data once. 
+
+Q
+What is the problem of the implementation above?
+A
+=>since we put the code inside of the componentWillMount()
+and this function will only be rendered once, so when the topic get updated, we can not update it in this page, since it only be rendered once/
+
+
+So now we need to figure out a way that whenever something changed or updated in the topic, we can refetch the data and re render it agian. 
+
+
+
+#################################
+##Recap the structure of Reflux##
+#################################
+
+
+
+
+
+
+
+
+
+
+
+

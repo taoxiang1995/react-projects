@@ -1,0 +1,496 @@
+
+
+#####################
+set up the fire base
+#####################
+
+we need to use the firebase url to interact with the database.
+
+after we sign up for the firebase, we need to install the reactfire.
+
+npm install --save reactfire@0.4.0
+npm install --save firebase
+
+
+#############################################
+How is the react communicate with the server
+ 
+                    user adds                               firebase.js make a request 
+                    a to do                                 to the server 
+      VIEWS        -------------->       Firebase.js       ------------------>        Firebase
+                   <--------------                          <------------------     
+                                                            firebase respond with 
+            give the data in the this.state                 all the data in the db
+              
+
+
+hook up the firebase to out app:
+use the url: https://incandescent-inferno-8726.firebaseio.com/
+=>then we need to create an instance of the firebase object once.
+
+=>since we only need it to call it once, we need somehow to let the component know to run the code once
+the way is to use the componentWillMont function
+Ex:
+ componentWillMount : function(){
+
+  	this.bindAsObject(new Firebase(rootUrl + 'items/'), 'items');
+
+  }, 
+
+=>If we create the firebase object using bindAsObject, we can latter reference this object by using: this.firebaseRefs
+
+=>bindAsObject is a function from reactfire, how can we use it in our component?
+the way is to use mixins: [reactfire],
+this is pretty much like the inheritene concept in c++ , after that we can use the funtion from reactfire object.
+
+=>items is a route, so later we can access to the data using this.state.items
+
+
+
+##############################
+ build up the Header component
+
+Q
+If we have another component file in src dir, How can we integrate
+it to another component?
+A
+(1) we need to require that file in the component file we wanna integrate with
+Ex: var Header = require('./header');
+
+(2) simple use the Header as a self closing tag:
+<Header />
+
+
+##############################
+ Play with the form
+
+ [Basic idea]
+ We use the state, eventhandler to handle the form input.
+ It is different than the php way, where we use the post/get method to handle the state. 
+ we set the value of input as value = {this.state.text}
+
+ and we get the input and set it to this.state.text
+
+ Q
+ How to reference the value of the user input?
+ A
+ the value user input is at the:
+ event.target.value
+
+ where event is the argument of the event handler function
+ Ex:
+ HandleInputChange = function(event){
+ 	setState({text: event.target.value});
+ }
+
+=>for a event handler function, it will always have event attibute which has theinformation about that element/
+ onChange = HandleInputChange
+ =>the way it works is we assign the HandleInputChange function to onChange attribute
+ so whenever there is a change made in the form, HandleInputChange function will be called.
+ =>we can get the input value by event.target.value where event is the argument passed to the HandleInputChange function. 
+   we use the setState function to set the text.
+=>then , we can use the text somewhere else like console out to the screen, or put it to the databse.
+
+
+Q
+How can we update the value of the input? (show up in the input area)?
+A
+<input value={this.state.text}>
+
+
+
+Ex:
+getInitialState: function(){
+		return {
+			text : ''
+		}
+	},
+	render: function (){
+		return <div className = "input-group">
+			<input 
+				value={this.state.text}
+				onChange = {this.handleInputChange}
+				type="text" className="form-control" />
+			<span className = "input-group-btn">
+				<button onClick = {this.handleClick}
+					className="btn btn-default" type="button">
+					Add
+				</button>
+			</span>
+			{this.state.text}
+		</div>
+	},
+	handleClick: function(){
+		//console.log('I was Clicked!');
+		//send value of text input to Firebase
+
+	},
+	//event object will decribe what happen
+	//a direct refernec to that dom element
+	handleInputChange: function(event){
+		//dom referene
+		this.setState({text : event.target.value});
+	}
+
+
+############################
+  put the input to databse
+
+=>we need to use the firebase
+
+Q
+How can we put the user input data to the firebase?
+A
+[Basic idea]
+(1) we need to have an instance of the firebase (if in the child component, pass it as )
+(2) we need to put the data to the firebase use the push function. Where? in the handleclick function. 
+
+Q
+How to create an instance of the firebase.
+A
+=>we already created an instance in the componentWillMount function:
+this.bindAsObject(new Firebase(rootUrl + 'items/'), 'items');
+
+however, this function is anoymous, we do not have it assinged it to a name, so how can we reference to it?
+=>we can use this.firebaseRefs.item to reference the database.
+
+so we can pase the instance of the database to the child component by:
+<Header itemsStore={this.firebaseRefs.items} />
+
+Q
+How can we store the data to the firebase?
+A
+use the push function, once we pass in the firebaseRefs.items say to itemsStore
+we can do:
+
+this.props.itemsStore.push({text:'sdsd',
+								done: false});
+
+
+Q
+Where do we sotre the data of user input? Since we can not do things like in get the data in $_POST[]
+A
+We store the data in the state. 
+We initialize a state using 
+
+getInitialState: function(){
+		return {
+			text : ''
+		}
+	},
+
+Then we set the state using:
+handleInputChange: function(event){
+		//dom referene
+		this.setState({text : event.target.value});
+	}
+
+#######################
+    List of todos
+#######################
+
+If there is no todos, we need to show ther is no todos. 
+
+
+Q
+How to initialize a state?
+A
+getInitialState : function (){
+    return {
+      items : {}
+    }
+  },
+
+
+Q
+Since we already have this.bindAsObject(new Firebase(rootUrl + 'items/'), 'items'); why do we have to initialize the item?
+A
+It is because the way firebase works,
+=>the browser will first ender all the components,
+=>then will conncect to the firebase to pull out the data they have.
+
+so at the first time browser render the component, item is not defined it, since firebase is not connected yet. 
+
+Q
+what is the difference between this.firebaseRefs.items and this.state.items?
+A
+=>firebaseRefs is the object of the firebase. it has the functions
+=>items is just the object of the data store in the database. 
+
+Q
+What does the firebase return?
+A
+=>it will return an object (key value pairs) this.state.items
+where items is the route we set up in the bindAsObject function/.
+=>since it is a key value pair we can use the for (var key in this.props.items) to access each item by this.props.items[key].text
+
+Q
+How can we return a list of stuff, since we can not use <?php foreach ?> in javascript?
+A
+=>if the thing we tring to return is store in the array, then we can do:
+array.map(function(item){})
+
+=>if it is stored in the object, we can not use the map function.
+we should not write the code for <li></li> directly in the render retrun 
+\place, instead, we use forloop to generate the <li></li>out side the render function, put the code in another function, sat renderList, then call this function in the render return:
+return <ul>
+	{this.renderList()}
+</ul>
+Ex:
+render: function(){
+		console.log(this.props.items);
+
+		
+		return <ul>
+			{this.renderList()}
+		</ul>
+	},
+
+	renderList: function(){
+		if (this.props.items && Object.keys(this.props.items).length === 0)
+		{
+			return <h4>
+				Add a todo to get started.
+			</h4>
+		}
+		else
+		{
+			var children = [];
+			for (var key in this.props.items)
+			{
+				children.push(
+					<li>
+						{this.props.items[key].text}
+					</li>
+					)
+			}
+			return children;
+			
+	
+		}
+	}
+
+
+Q
+Since browser will render the component twice, first without firbase connected, how can we solve the problem that "add todo " prompt show up at the first time?
+A
+[Basic idea]
+Using the css sheet.
+=>we can give a default attribute to the <list> to make it transparent, and add one more state: loaded to show if the firebase is connected, and there is data in side. 
+when the loaded state is true, then we should append another attribute to negate the opcacity.
+
+(1) in the index.html we define a css sheet:
+    .content class and .loaded class
+    .content {
+  		opacity: 0;
+  		transition: opacity 1s ease-in;
+  	}
+  	.loaded {
+  		opacity: 1;
+  	}
+
+(2) 
+	<div className={"content " + (this.state.loaded? 'loaded' : '')}>
+          <List items = {this.state.items}/>
+    </div>
+
+    =>we embrace the <List> with a <div>
+    the default setting for the <div> is content
+    we use a controll expression to add the .loaded class.
+    if the this.state.loaded is true, then we append .loaded class.
+
+
+Q How can we append javascript to the <html> tags?
+A
+=> put javascript code inside of the {    }
+
+Q
+what is the conditional operator in Javascript?
+A
+condition ? exp1 : exp2
+
+if the condition is true, expressio in the left side will be returned, 
+otherwise, the expression in theright will be returned.
+
+Q
+what will happen if the class have multiple className?
+A
+=>each element attribute will be executed in a sequence,
+=>so later attribute will possibly overwirte the previous attribute.
+
+
+Q
+How to append css script into html without writeing it in another file?
+A
+=>we can put it in the <head> </head>
+using <scipt type="text/css"> </script> 
+=>Ex:
+<style type="text/css">
+  	.content {
+  		opacity: 0;
+  		transition: opacity 1s ease-in;
+  	}
+  	.loaded {
+  		opacity: 1;
+  	}
+  </style>
+
+
+
+
+####################################
+  Construct the complex todo list
+    checkbox, edit and delete
+####################################
+
+
+since the list will need to have check box, an edit input and delete button
+so it is inproper to push all these together to the Child array
+
+children.push (<list> {something} </list>)
+
+=>the solution is to define another component <item-list> 
+
+Q
+What is the key attibute in the html?
+A
+=>not so sure about this.
+=>when we have a loop to geberate the some element, we need to assign a key
+=>also, we can not sinply use the this.props.key to access the key attibute if we pass the key to our react component. 
+=>so we can assing the actual key value to another attibute as a object field:
+var item = this.props.items[key];
+				item.key = key;
+				children.push(
+					<ListItem
+						item={item}
+						key = {key}
+
+						>
+						
+					</ListItem>
+
+Q
+What is <span> in html?
+A
+<span> defines a incline block
+
+
+
+##################################
+ add the function for check box
+
+Q
+What is the control form element?
+A
+control form element is those who have their value tied directly to the this.state
+
+
+
+Q
+What is the basic idea to add the function of check box?
+A
+=>use the eventlisterner: onChange and append a function handleDoneChange
+also add anew state done.
+
+=>handleDoneChange function should change the "done" state of the checkbox element
+and also update the firebase
+
+
+
+Q
+How can we get access to the firebase in the item-list component?
+A
+=>why cant we do something like in the list component? just pass in the instance of the firebase to the component?
+  Because now we are dealing with one single item not the entire todolist.
+
+=>How can we get access to the specific item in the firebase?
+	rootURL + 'items/' + keys
+	now we can get the access to specific item, we can deleete, update it.etc
+
+
+Ex:
+handleDoneChange: function (event)
+  {
+    var update = {done : event.target.checked};
+    this.setState (update);
+    this.fb.update(update);
+  }
+
+//event.target.checked is also a buildin input context
+
+
+
+#####################################
+  Add function for edit and remove
+
+Q 
+If user input something to the input box, we need to recognize it, and shouw up the two buttons: edit and undo, how can we do it?
+A
+we use the event handler (onChange) and the state (textChanged)
+=>when user change something inside the box, onChange will call the 
+handleTextChange function
+=>
+handleTextChange: function (event)
+  {
+    this.setState({
+      text: event.target.value,
+      textChanged: true
+    });
+  },
+
+inside the handleTextChange function, we will change the text state, and textChanged state
+
+
+
+
+Q
+If the return structure in render function becomes reallly complecated,
+what should we do?
+A
+there are 2 options:
+(1) we can create another component
+(2) we can pull some of the code to another function
+    and return the html back in that function:
+    Ex:
+    <span className = "input-group-btn">
+        {this.changesButtons()}
+        <button className="btn btn-default"
+          onClick = {this.handleDeleteClick}
+        >
+
+    changesButtons : function ()
+  {
+    if (!this.state.textChanged)
+    {
+      return null;
+    }
+    else
+    {
+      return <span>
+      <button className="btn btn-default"> Save </button>
+      <button className="btn btn-default"> Undo </button>
+    </span>
+    }
+    
+  },
+
+##### save the edits
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,20 @@
+=>1.
+return 
+<div>
+			Hello World!
+			</div>
+the things be returned should go right after the return, cant skip a line.
+
+=>2.
+when I declare an object, there are a couple of things need to notice;
+javascript doesnt use "=" to assign value, it uses ":" instead
+after we decalre one member variable in the object, we shold use "," to split it from followoing declaration
+the last one should end without any symbols;
+Ex:
+var options = {
+		title : "message",
+		number : 108
+	};
+
+
+=>3.
